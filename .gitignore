@@ -1,0 +1,11 @@
+/bin/
+/dist/
+/build/
+*.log
+.DS_Store
+.idea/
+.vscode/
+.env
+
+# DAX CLI
+code_dump.md
