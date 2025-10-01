@@ -22,6 +22,8 @@ WORKDIR /srv
 COPY --from=builder /app/server /srv/server
 
 ENV PORT=8080
+ENV APP_VERSION=0.1.0
+
 EXPOSE 8080
 
 CMD ["/srv/server"]
