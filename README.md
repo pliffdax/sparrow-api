@@ -2,6 +2,7 @@
 
 ## Functionality
 - `GET /health` — returns JSON with ok status, current time and version of the project
+  
   ```json
   {
     "status": 200,
