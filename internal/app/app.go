@@ -10,6 +10,7 @@ import (
 	"time"
 
 	httprouter "github.com/pliffdax/sparrow-api/internal/http"
+	"github.com/pliffdax/sparrow-api/internal/storage/memory"
 	"github.com/pliffdax/sparrow-api/internal/util"
 )
 
@@ -23,7 +24,11 @@ func New() *App {
 
 	addr := ":" + util.Getenv("PORT", "8080")
 
-	r := httprouter.NewRouter()
+	userStore := memory.NewUserStore()
+	categoryStore := memory.NewCategoryStore()
+	recordStore := memory.NewRecordStore()
+
+	r := httprouter.NewRouter(userStore, categoryStore, recordStore)
 
 	srv := &http.Server{
 		Addr:              addr,

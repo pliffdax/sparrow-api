@@ -5,36 +5,43 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
 	"github.com/pliffdax/sparrow-api/internal/http/handlers"
+	"github.com/pliffdax/sparrow-api/internal/storage"
 )
 
-func NewRouter() http.Handler {
+func NewRouter(
+	us storage.UserStore,
+	cs storage.CategoryStore,
+	rs storage.RecordStore,
+) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
-	r.Use(middleware.Recoverer)
+	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
 	r.Get("/health", handlers.HealthCheck())
 
-	r.Route("/user", func(r chi.Router) {
-		r.Post("/", handlers.CreateUser())
-		r.Get("/{user_id}", handlers.GetUser())       // id with fetching logic will be added later
-		r.Delete("/{user_id}", handlers.DeleteUser()) // id with deleting logic will be added later
+	r.Route("/users", func(r chi.Router) {
+		r.Get("/", handlers.ListUsers(us))
+		r.Get("/{id}", handlers.GetUser(us))
+		r.Post("/", handlers.CreateUser(us))
+		r.Delete("/{id}", handlers.DeleteUser(us))
 	})
-	r.Get("/users", handlers.ListUsers())
 
-	r.Route("/category", func(r chi.Router) {
-		r.Post("/", handlers.CreateUser())
-		r.Delete("/{id}", handlers.DeleteUser()) // id with deleting logic will be added later
+	r.Route("/categories", func(r chi.Router) {
+		r.Get("/", handlers.ListCategories(cs))
+		r.Post("/", handlers.CreateCategory(cs))
+		r.Delete("/{id}", handlers.DeleteCategory(cs))
 	})
-	r.Get("/category", handlers.ListCategories())
 
-	r.Route("/record", func(r chi.Router) {
-		r.Post("/", handlers.CreateRecord())
-		r.Get("/{record_id}", handlers.GetRecord())       // id with fetching logic will be added later
-		r.Delete("/{record_id}", handlers.DeleteRecord()) // id with deleting logic will be added later
+	r.Route("/records", func(r chi.Router) {
+		r.Get("/", handlers.QueryRecords(rs)) // ?user_id=&category_id=
+		r.Get("/{id}", handlers.GetRecord(rs))
+		r.Post("/", handlers.CreateRecord(rs, us, cs))
+		r.Delete("/{id}", handlers.DeleteRecord(rs))
 	})
-	r.Get("/record", handlers.QueryRecords()) // ?user_id=&category_id=
 
 	return r
 }
