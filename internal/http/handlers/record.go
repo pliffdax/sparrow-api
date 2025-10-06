@@ -16,7 +16,7 @@ type createRecordReq struct {
 	UserID     int64   `json:"user_id"`
 	CategoryID int64   `json:"category_id"`
 	Amount     float64 `json:"amount"`
-	CreatedAt  *string `json:"created_at,omitempty"` // опционально: RFC3339
+	CreatedAt  *string `json:"created_at,omitempty"`
 }
 
 func CreateRecord(rs storage.RecordStore, us storage.UserStore, cs storage.CategoryStore) http.HandlerFunc {

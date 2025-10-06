@@ -2,40 +2,56 @@
 
 ## Functionality
 - `GET /health` — returns JSON with ok status, current time and version of the project
-  
-  ```json
-  {
-    "status": 200,
-    "time": "2025-10-01T12:56:19Z",
-    "status": "0.1.0" 
-  }
-  ```
+- `POST /users` — create a user { "name": "Alice" } → 201
+- `GET /users` — list users → 200
+- `GET /users/{id}` — get user by id → 200/404
+- `DELETE /users/{id}` — delete user → 204/404
+- `POST /categories` — create a category { "title": "Food" } → 201
+- `GET /categories` — list categories → 200
+- `DELETE /categories/{id}` — delete category → 204/404
+- `POST /records` — create a record { "user_id": 1, "category_id": 1, "amount": 99.5, "created_at"?: RFC3339 } Validates that user_id and category_id exist. → 201/400
+- `GET /records?user_id=&category_id=` — filter by one or both params (at least one required) → 200/400
+- `GET /records/{id}` — get record by id → 200/404
+- `DELETE /records/{id}` — delete record → 204/404
 
 ## Project structure
 ```text
 sparrow-api
-├── cmd
-│   └── server
+├── cmd/
+│   └── server/
 │       └── main.go
 ├── docker-compose.yml
 ├── Dockerfile
-├── docs
-│   ├── lab1
-│   │   ├── assets
-│   │   └── README.md
-│   ├── lab2
-│   │   ├── assets
-│   │   └── README.md
-│   ├── lab3
-│   │   ├── assets
-│   │   └── README.md
-│   └── lab4
-│       ├── assets
-│       └── README.md
+├── docs/
+│   ├── lab1/
+│   ├── lab2/
+│   ├── lab3/
+│   └── lab4/
 ├── go.mod
 ├── go.sum
-├── internal
-│   └── ...
+├── internal/
+│   ├── app/
+│   │   └── app.go
+│   ├── domain/
+│   │   ├── category.go
+│   │   ├── record.go
+│   │   └── user.go
+│   ├── http/
+│   │   ├── handlers/
+│   │   │   ├── category.go
+│   │   │   ├── health.go
+│   │   │   ├── record.go
+│   │   │   └── user.go
+│   │   └── router.go
+│   ├── storage/
+│   │   ├── memory/
+│   │   │   ├── categories.go
+│   │   │   ├── records.go
+│   │   │   └── users.go
+│   │   └── storage.go
+│   └── util/
+│       ├── env.go
+│       └── json.go
 └── README.md
 ```
 
