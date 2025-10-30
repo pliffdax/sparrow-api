@@ -10,7 +10,7 @@ import (
 	"time"
 
 	httprouter "github.com/pliffdax/sparrow-api/internal/http"
-	"github.com/pliffdax/sparrow-api/internal/storage/memory"
+	"github.com/pliffdax/sparrow-api/internal/storage/postgres"
 	"github.com/pliffdax/sparrow-api/internal/util"
 )
 
@@ -24,9 +24,18 @@ func New() *App {
 
 	addr := ":" + util.Getenv("PORT", "8080")
 
-	userStore := memory.NewUserStore()
-	categoryStore := memory.NewCategoryStore()
-	recordStore := memory.NewRecordStore()
+	// userStore := memory.NewUserStore()
+	// categoryStore := memory.NewCategoryStore()
+	// recordStore := memory.NewRecordStore()
+
+	db, err := postgres.New(os.Getenv("DB_DSN"))
+	if err != nil {
+		log.Fatalf("db connect: %v", err)
+	}
+
+	userStore := postgres.NewUserStore(db)
+	categoryStore := postgres.NewCategoryStore(db)
+	recordStore := postgres.NewRecordStore(db)
 
 	r := httprouter.NewRouter(userStore, categoryStore, recordStore)
 
