@@ -17,6 +17,7 @@
 ## Project structure
 ```text
 sparrow-api
+.
 ├── cmd/
 │   └── server/
 │       └── main.go
@@ -48,10 +49,18 @@ sparrow-api
 │   │   │   ├── categories.go
 │   │   │   ├── records.go
 │   │   │   └── users.go
+│   │   ├── postgres/
+│   │   │   ├── categories.go
+│   │   │   ├── db.go
+│   │   │   ├── records.go
+│   │   │   └── users.go
 │   │   └── storage.go
 │   └── util/
 │       ├── env.go
 │       └── json.go
+├── migrations/
+│   ├── 0001_init.sql
+│   └── 0002_seed.sql
 └── README.md
 ```
 
@@ -89,6 +98,23 @@ feat: add chi router with /health endpoint
 chore(docker): add Dockerfile and docker-compose setup
 ```
 
+## Variant
+
+**Group:** IO-35  
+**Variant formula:** 35 % 3 = 2  
+**Resulting task:** **Користувацькі категорії витрат**
+
+Implemented according to the variant:
+- Added global (`is_global = true`) and user (`is_global = false, owner_id = user_id`) expense categories.
+- Global categories are visible to all users.
+- User categories are visible only to their creators.
+- Access control implemented: users cannot delete or use someone else's categories (HTTP 403).
+- All logic verified via Postman tests in `docs/lab3/`.
+
 ## Author
 - GitHub: [@Pliffdax](https://github.com/Pliffdax)  
 - Telegram: [@Pliffdax](https://t.me/Pliffdax)
+
+---
+
+© KPI — Pliffdax – Sparrow API — 2025
