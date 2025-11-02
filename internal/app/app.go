@@ -28,7 +28,15 @@ func New() *App {
 	// categoryStore := memory.NewCategoryStore()
 	// recordStore := memory.NewRecordStore()
 
-	db, err := postgres.New(os.Getenv("DB_DSN"))
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		dsn = os.Getenv("DB_DSN")
+	}
+	if dsn == "" {
+		log.Fatal("no DATABASE_URL/DB_DSN provided")
+	}
+	
+	db, err := postgres.New(dsn)
 	if err != nil {
 		log.Fatalf("db connect: %v", err)
 	}
