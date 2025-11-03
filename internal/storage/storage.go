@@ -22,3 +22,8 @@ type RecordStore interface {
 	Delete(id int64) bool
 	Query(userID, categoryID int64) []domain.Record
 }
+
+type AuthUserStore interface {
+	CreateWithPassword(name, passwordHash string) (domain.User, error)
+	FindAuth(name string) (id int64, passwordHash string, err error)
+}

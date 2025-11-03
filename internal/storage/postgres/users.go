@@ -36,7 +36,34 @@ func (s *UserStore) Delete(id int64) bool {
 }
 
 func (s *UserStore) List() []domain.User {
-	var out []domain.User
+	out := make([]domain.User, 0)
 	_ = s.db.Order("id").Find(&out).Error
 	return out
+}
+
+func (s *UserStore) CreateWithPassword(name, passwordHash string) (domain.User, error) {
+	u := domain.User{Name: name}
+	tx := s.db.Begin()
+	if err := tx.Create(&u).Error; err != nil {
+		tx.Rollback()
+		return domain.User{}, err
+	}
+	if err := tx.Model(&u).Update("password_hash", passwordHash).Error; err != nil {
+		tx.Rollback()
+		return domain.User{}, err
+	}
+	if err := tx.Commit().Error; err != nil {
+		return domain.User{}, err
+	}
+	return u, nil
+}
+
+func (s *UserStore) FindAuth(name string) (int64, string, error) {
+	var id int64
+	var ph string
+	row := s.db.Raw(`SELECT id, password_hash FROM users WHERE name = ? LIMIT 1`, name).Row()
+	if err := row.Scan(&id, &ph); err != nil {
+		return 0, "", err
+	}
+	return id, ph, nil
 }
