@@ -5,7 +5,7 @@
 
 ---
 
-## 1️⃣ Підготовка середовища
+## 1. Підготовка середовища
 
 ### Docker Compose
 У проєкт додано сервіс бази даних PostgreSQL:
@@ -54,7 +54,7 @@ PORT=8080
 
 ---
 
-## 2️⃣ Міграції та сідінг
+## 2. Міграції та сідінг
 
 ### `0001_migration.sql`
 Створює таблиці `users`, `categories`, `records`:
@@ -103,7 +103,7 @@ SELECT 'Health', TRUE WHERE NOT EXISTS (SELECT 1 FROM categories WHERE title='He
 
 ---
 
-## 3️⃣ Варіант завдання
+## 3. Варіант завдання
 
 **Група:** IO-35  
 **Варіант:** 35 % 3 = 2 → *Користувацькі категорії витрат*
@@ -116,7 +116,7 @@ SELECT 'Health', TRUE WHERE NOT EXISTS (SELECT 1 FROM categories WHERE title='He
 
 ---
 
-## 4️⃣ Тестування API (Postman)
+## 4. Тестування API (Postman)
 
 ### Environment `Local`
 ```
@@ -137,7 +137,7 @@ userId  = 1
 
 ---
 
-## 5️⃣ Команди запуску
+## 5. Команди запуску
 
 ```bash
 # Підняти середовище
@@ -154,7 +154,7 @@ docker compose exec -T db psql -U $POSTGRES_USER -d $POSTGRES_DB -c "SELECT * FR
 
 ---
 
-## 6️⃣ Результати тестів
+## 6. Результати тестів
 
 - ✅ Глобальні категорії видимі всім користувачам.  
 - ✅ Користувацькі категорії видимі лише власнику.  
@@ -163,7 +163,7 @@ docker compose exec -T db psql -U $POSTGRES_USER -d $POSTGRES_DB -c "SELECT * FR
 
 ---
 
-## 7️⃣ Теги версій
+## 7. Теги версій
 
 | ЛР | Версія | Коментар |
 |----|---------|-----------|

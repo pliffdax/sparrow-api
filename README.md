@@ -1,18 +1,35 @@
 # Sparrow API
 
 ## Functionality
-- `GET /health` — returns JSON with ok status, current time and version of the project
-- `POST /users` — create a user { "name": "Alice" } → 201
+
+### Public endpoints
+- `GET /health` — returns JSON with status, current time and API version
+- `POST /auth/register` — registers a new user  
+  Request: `{ "name": "Alice", "password": "123" }` → 201
+- `POST /auth/login` — authenticates and returns JWT token  
+  Response: `{ "access_token": "<jwt>", "token_type": "Bearer" }`
+
+### Protected endpoints  
+Require header: `Authorization: Bearer <jwt>`
+
+#### Users
 - `GET /users` — list users → 200
-- `GET /users/{id}` — get user by id → 200/404
-- `DELETE /users/{id}` — delete user → 204/404
-- `POST /categories` — create a category { "title": "Food" } → 201
+- `GET /users/{id}` — get user by ID → 200/404
+- `DELETE /users/{id}` — delete user by ID → 204/404
+
+#### Categories
+- `POST /categories` — create a category `{ "title": "Food" }` → 201
 - `GET /categories` — list categories → 200
 - `DELETE /categories/{id}` — delete category → 204/404
-- `POST /records` — create a record { "user_id": 1, "category_id": 1, "amount": 99.5, "created_at"?: RFC3339 } Validates that user_id and category_id exist. → 201/400
+
+#### Records
+- `POST /records` — create a record  
+  `{ "user_id": 1, "category_id": 1, "amount": 99.5, "created_at"?: RFC3339 }`  
+  Validates user + category existence → 201/400
 - `GET /records?user_id=&category_id=` — filter by one or both params (at least one required) → 200/400
-- `GET /records/{id}` — get record by id → 200/404
+- `GET /records/{id}` — get record by ID → 200/404
 - `DELETE /records/{id}` — delete record → 204/404
+
 
 ## Project structure
 ```text
@@ -39,11 +56,16 @@ sparrow-api
 │   │   └── user.go
 │   ├── http/
 │   │   ├── handlers/
+│   │   │   ├── auth.go
 │   │   │   ├── category.go
 │   │   │   ├── health.go
 │   │   │   ├── record.go
 │   │   │   └── user.go
+│   │   ├── middleware/
+│   │   │   └── auth.go
 │   │   └── router.go
+│   ├── security/
+│   │   └── jwt.go
 │   ├── storage/
 │   │   ├── memory/
 │   │   │   ├── categories.go
@@ -60,8 +82,31 @@ sparrow-api
 │       └── json.go
 ├── migrations/
 │   ├── 0001_init.sql
-│   └── 0002_seed.sql
+│   ├── 0002_seed.sql
+│   └── 0003_add_password_hash.sql
 └── README.md
+```
+
+### Environment variables required
+
+| Variable      | Description |
+|--------------|-------------|
+| POSTGRES_DB | database name |
+| POSTGRES_USER | database user |
+| POSTGRES_PASSWORD | database password |
+| DB_DSN | connection string for API |
+| JWT_SECRET | secret key used to sign JWT tokens |
+| JWT_TTL | token lifetime (e.g. `24h`) |
+
+Example:
+```env
+POSTGRES_DB=sparrow
+POSTGRES_USER=sparrow
+POSTGRES_PASSWORD=secret
+DB_DSN=postgres://sparrow:secret@db:5432/sparrow?sslmode=disable
+JWT_SECRET=some_super_secret_key
+JWT_TTL=24h
+PORT=8080
 ```
 
 ## How to start localy
@@ -82,6 +127,54 @@ docker run --rm -p 8080:8080 -e PORT=8080 sparrow-api:latest
 ```bash
 docker-compose up --build
 ```
+
+## Database Migrations
+
+PostgreSQL migrations are stored in the `migrations/` folder and must be applied
+before using authenticated endpoints. There are two options:
+
+---
+
+### Option A — Fresh start (recommended for local development)
+
+If you want PostgreSQL to apply migrations automatically on startup:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+The SQL files inside ./migrations will run automatically only on the first launch
+of a new Postgres volume.
+
+---
+
+### Option B — Apply migrations manually (if DB already exists)
+
+Check existing tables:
+
+```bash
+docker exec -it sparrow-db \
+  psql -U $POSTGRES_USER -d $POSTGRES_DB -c '\dt'
+```
+
+Apply migrations one-by-one:
+
+```bash
+docker exec -it sparrow-db \
+  psql -U $POSTGRES_USER -d $POSTGRES_DB \
+  -f /docker-entrypoint-initdb.d/0001_init.sql
+
+docker exec -it sparrow-db \
+  psql -U $POSTGRES_USER -d $POSTGRES_DB \
+  -f /docker-entrypoint-initdb.d/0002_seed.sql
+
+docker exec -it sparrow-db \
+  psql -U $POSTGRES_USER -d $POSTGRES_DB \
+  -f /docker-entrypoint-initdb.d/0003_add_password_hash.sql
+```
+
+> Use this only if your database volume already exists and tables were not created automatically.
 
 ## Deploy
 The application is deployed on Render.
